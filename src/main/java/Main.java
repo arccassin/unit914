@@ -1,3 +1,5 @@
+import Core.Line;
+import Core.Station;
 import com.cedarsoftware.util.io.JsonWriter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -11,7 +13,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -19,6 +20,7 @@ import java.util.Set;
  */
 public class Main {
     static HashMap<String, Line> number2line;
+
     public static void main(String[] args) {
         String url = "src/main/resources/station.html";
         String jsonStrPath = "src/main/resources/file.json";
@@ -42,13 +44,13 @@ public class Main {
             for (Element tableStation : stations) {
                 Element tr1 = tableStation.selectFirst("td:eq(0)");
                 Element tr2 = tableStation.selectFirst("td:eq(1)>span>a");
-                if (tr2 == null){
+                if (tr2 == null) {
                     tr2 = tableStation.selectFirst("td:eq(1)>a");
                 }
                 Element tr2final = tr2;
                 getLineByTrElement(tr1, resultList);
                 resultList.forEach(line -> {
-                    if (number2line.containsKey(line.getNumber())){
+                    if (number2line.containsKey(line.getNumber())) {
                         line = number2line.get(line.getNumber());
                     } else
                         number2line.put(line.getNumber(), line);
@@ -59,7 +61,7 @@ public class Main {
             }
             //наберем станции в линии
             Set<String> lineNumberSet = number2line.keySet();
-            for (String lineNumber: lineNumberSet) {
+            for (String lineNumber : lineNumberSet) {
                 JSONArray arrayStations = new JSONArray();
                 Line line = number2line.get(lineNumber);
                 line.getStations().stream().forEach(station -> arrayStations.add(station.getName()));
@@ -71,7 +73,7 @@ public class Main {
             //запишем линии в json
             JSONArray jsonLines = new JSONArray();
             jsonObject.put("Lines", jsonLines);
-            for (String lineNumber: lineNumberSet) {
+            for (String lineNumber : lineNumberSet) {
                 Line line = number2line.get(lineNumber);
                 JSONObject jsonline = new JSONObject();
                 jsonline.put("number", lineNumber);
@@ -81,8 +83,7 @@ public class Main {
 
             //приведем к человекочитаемому виду и запишем в файл
             String niceFormattedJson = JsonWriter.formatJson(jsonObject.toJSONString());
-            try (FileWriter writer = new FileWriter(jsonStrPath))
-            {
+            try (FileWriter writer = new FileWriter(jsonStrPath)) {
                 writer.write(niceFormattedJson);
                 writer.flush();
                 writer.close();
@@ -102,8 +103,8 @@ public class Main {
         for (int i = 0; i < elements.size() - 1; i++) {
             Element span1 = elements.get(i);
             Element span2 = elements.get(i + 1);
-            if ((span1.tagName() == "span") && (span2.tagName() == "span") &&
-                    (span1.attributes().hasKey("style")) && (span2.attributes().hasKey("title"))) {
+            if ((span1.tagName().equals("span") && (span2.tagName().equals("span") &&
+                    (span1.attributes().hasKey("style")) && (span2.attributes().hasKey("title")))) {
                 resultArray.add(new Line(span1.text(), span2.attr("title")));
             }
         }
